@@ -37,3 +37,10 @@ __pycache__/
 *.synctex
 *.nav
 *.snm
+*.pyg
+*.vrb
+*.xdv
+*.dvi
+
+# Pytest cache
+results/

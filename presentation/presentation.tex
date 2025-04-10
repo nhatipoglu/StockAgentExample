@@ -11,249 +11,734 @@
 \usepackage{float}
 \usepackage{hyperref}
 \usepackage{color}
+\usepackage{booktabs} % preamble'da olmalı
+\usepackage{minted}
+
+\usepackage[most]{tcolorbox}
+\definecolor{paramblue}{rgb}{0.1,0.2,0.8}
 
 \renewcommand*\contentsname{İçindekiler}
 \renewcommand{\figurename}{Şekil}
 \renewcommand{\tablename}{Tablo}
 
-\title{Talep Tahmini ve Stok Optimizasyonu ile \\ Fazla Stok \\ ve \\ Stoksuz Kalma Problemlerini Çözme}
+\title{Talep Tahmini ve Stok Optimizasyonu ile \\ Fazla Stok \\ ve \\ Stoksuz
+	Kalma Problemlerini Çözme}
 \author{Nuh HATİPOĞLU}
 \date{11 Nisan 2025}
-
-\graphicspath{{/home/nuh/Desktop/StockAgentExample/results/}}
 
 \begin{document}
 
 % Title Slide
 \begin{frame}
-  \titlepage
+	\titlepage
 \end{frame}
 
 % Table of contents
 \begin{frame}
-  \frametitle{İçindekiler}
-  \tableofcontents
+	\frametitle{İçindekiler}
+	\begin{enumerate}
+		\item Giriş
+		\item Sentetik Veri Üretimi ve Yapısı
+		\item Tahmin (Forecasting) Modelleri
+		\item Train / Test Veri Seti Hazırlanması
+		\item Model Eğitim ve Test Sonuçları
+		\item Başarım Metrikleri
+		\item İşletme Parametreleri ile Hesaplamalar
+		\item Tahmin ve Optimizasyon
+		\item Agent Analizleri
+	\end{enumerate}
+
 \end{frame}
 
 % ---------------------
 \section{Giriş}
 \begin{frame}
-  \frametitle{Giriş}
-  \begin{itemize}
-    \item Hızlı moda sektöründe talep tahmini ve stok optimizasyonu önemlidir.
-    \item Veri bilimi ve yapay zeka kullanarak karar destek sistemleri geliştirilmiştir.
-    \item Proje, geçmiş satış verileri, ürün varyantları, kampanyalar ve kanal bilgilerini kullanmaktadır.  
-    \item Amaç, talep tahminleri ve stok optimizasyon kararları vermektir.
-    \item Proje üç temel fazdan oluşmaktadır:
-      \begin{itemize}
-        \item Sentetik veri üretimi
-        \item Çoklu makine öğrenimi modeliyle talep tahmini
-        \item Stok kararlarını veren bir akıllı ajan sistemi
-      \end{itemize}
-    \end{itemize} % Ensure \end{itemize} is properly closed
+	\frametitle{Giriş}
+	\begin{itemize}
+		\item Hızlı moda sektöründe talep tahmini ve stok
+		      optimizasyonu önemlidir.
+		\item Veri bilimi ve yapay zeka kullanarak karar destek
+		      sistemleri geliştirilmiştir.
+		\item Proje, geçmiş satış verileri, ürün varyantları,
+		      kampanyalar ve kanal bilgilerini kullanmaktadır.
+		\item Amaç, talep tahminleri ve stok optimizasyon
+		      kararları vermektir.
+		\item Proje üç temel fazdan oluşmaktadır:
+		      \begin{itemize}
+			      \item Sentetik veri üretimi
+			      \item Çoklu makine öğrenimi modeliyle talep
+			            tahmini
+			      \item Stok kararlarını veren bir akıllı ajan
+			            sistemi
+		      \end{itemize}
+	\end{itemize} % Ensure \end{itemize} is properly closed
 \end{frame}
+
+% ---------------------------------------------
 
 \section{Sentetik Veri Üretimi ve Yapısı}
 \begin{frame}
-  \frametitle{Sentetik Veri Üretimi}
-  \begin{itemize}
-  	\item Gerçek verilere oldukça yakın şekilde 2019–2025 yılları arasını kapsayan sentetik veriler oluşturulmuştur. Bu veri seti aşağıdaki alt kümeleri içerir:
-  	\begin{itemize}
-  		\item products.csv: Ürün, kategori, beden ve renk varyant bilgileri
-  		\item sales\_data.csv: Günlük satış adetleri (ürün, varyant, mağaza, kanal bazlı)
-  		\item campaigns.csv: Kampanya tarihleri ve açıklamaları
-  	\end{itemize}  
+	\frametitle{Sentetik Veri Üretimi}
+	\begin{itemize}
+		\item Gerçek verilere oldukça yakın şekilde 2019–2025 yılları
+		      arasını kapsayan sentetik veriler oluşturulmuştur. Bu veri seti aşağıdaki alt
+		      kümeleri içerir:
+		      \begin{itemize}
+			      \item products.csv: Ürün, kategori, beden ve renk
+			            varyant bilgileri
+			      \item sales\_data.csv: Günlük satış adetleri (ürün,
+			            varyant, mağaza, kanal bazlı)
+			      \item campaigns.csv: Kampanya tarihleri ve açıklamaları
+		      \end{itemize}
 
-  \end{itemize}  
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
 	\frametitle{Sentetik Veri Üretimi}
 	\begin{itemize}
-		\item Tüm varyant kombinasyonları (örneğin Ürün A - Renk Mavi - Beden L) günlük olarak satış verisine sahiptir.
-		\item Fiziksel ve Online olmak üzere iki ana kanal, 50 mağaza üzerinden modellenmiştir.
-	\end{itemize}  
+		\item Tüm varyant kombinasyonları (örneğin Ürün A - Renk Mavi -
+		      Beden L) günlük olarak satış verisine sahiptir.
+		\item Fiziksel ve Online olmak üzere iki ana kanal, 50 mağaza
+		      üzerinden modellenmiştir.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Kategori Dağılımı}
+	\centering
+
+	\includegraphics[width=0.65\linewidth]{figures/category_distribution.png}
+
+	\vspace{0.5em}
+	\small\textit{Kategori bazında ürün sayılarının dağılımı.}
+\end{frame}
+
+\begin{frame}{Sentetik Veri Üretimi}
+	\begin{itemize}
+		\item Ürün portföyünün büyük kısmı Erkek Giyim kategorisinde
+		      yoğunlaşmıştır. Kadın ve Çocuk Giyim kategorileri daha az ürün içerir.
+		      \\~\\
+		\item	Bu dağılım, tahmin modellerinin veri dengesizliği
+		      nedeniyle erkek ürünlerine daha duyarlı hale gelmesini sağlayabilir.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\centering
+	\includegraphics[width=0.65\linewidth]{figures/monthly_total_sales.png}
+	\vspace{0.5em}
+	{\small \textit{Aylık bazım toplam satış miktarları}}
+\end{frame}
+
+\begin{frame}{Sentetik Veri Üretimi}
+	\begin{itemize}
+		\item Haziran–Ağustos aylarında satışlar zirve yaparken, Şubat
+		      ayında en düşük seviyeye gerilemektedir.
+		      \\~\\
+		\item Bu dönemsel etki, tahmin modellerine mevsimsellik
+		      bileşenlerinin dahil edilmesini zorunlu kılar.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\centering
+
+	\includegraphics[width=0.65\linewidth]{figures/campaign_sales_boxplot.png}
+	\vspace{0.5em}
+	{\small \textit{İndirim oranı ve satış arasındaki ilişki grafiği}}
+\end{frame}
+
+\begin{frame}{Sentetik Veri Üretimi}
+	\begin{itemize}
+		\item Kampanya dönemlerinde uç değerlerin artması dikkat
+		      çekicidir.
+		      \\~\\
+		\item  Ancak ortanca değerlerde belirgin fark yoktur.
+		      \\~\\
+		\item Bu durum, kampanyaların satışları bazı ürünlerde
+		      artırdığını ama genel dağılımı çok değiştirmediğini gösterir.
+	\end{itemize}
 \end{frame}
 
 \section{Tahmin (Forecasting) Modelleri}
-\begin{frame}{Tahmin (Forecasting) Modelleri}
-	Ürünlerin varyant bazlı talep tahminleri için üç farklı model kullanılmıştır: 
+\begin{frame}
+	\frametitle{\insertsection: Tahmin (Forecasting) Modelleri}
+	Ürünlerin varyant bazlı talep tahminleri için üç farklı model
+	kullanılmıştır:
 	\vspace{0.5cm}
 	\begin{itemize}
 		\item Prophet
-		\item LSTM 
+		\item LSTM
 		\item XGBoost
 	\end{itemize}
 	\vspace{0.5cm}
-	Her model farklı avantajlara sahiptir ve farklı veri yapılarıyla en uygun sonucu verecek şekilde tasarlanmıştır.
+	Her model farklı avantajlara sahiptir ve farklı veri yapılarıyla en
+	uygun sonucu verecek şekilde tasarlanmıştır.
 \end{frame}
 
-\subsection{Prophet}
-\begin{frame}{Prophet Modeli}
+\begin{frame}
+	\frametitle{\insertsection: Prophet Modeli}
 	\textbf{Neden Kullanıldı} \\~\\
 	\begin{itemize}
-		\item Facebook tarafından geliştirilen, zaman serisi verilerde trend ve mevsimsellik yakalamada güçlüdür.
-		\item Kampanya etkileri gibi dışsal değişkenleri \texttt{add\_regressor} ile modele entegre edebilir.
+		\item Facebook tarafından geliştirilen, zaman serisi verilerde
+		      trend ve mevsimsellik yakalamada güçlüdür.
+		\item Kampanya etkileri gibi dışsal değişkenleri
+		      \texttt{add\_regressor} ile modele entegre edebilir.
 	\end{itemize}
 \end{frame}
 
-\begin{frame}{Prophet Modeli}
-	\textbf{Avantajları} 
+\begin{frame}
+	\frametitle{\insertsection: Prophet Modeli}
+	\textbf{Avantajları}
 	\begin{itemize}
 		\item Model açıklanabilirliği yüksek
 		\item Mevsimsel dalgalanmaları başarılı şekilde yakalar
 		\item Az veriyle de çalışabilir
+		\item Veri miktarı azsa
+		\item Açıklanabilirlik önemliyse
+		\item Trend ve mevsimsellik barizse
+		\item Operasyonel kararlarda şeffaflık gerekiyorsa
+		\item Düşük varyanslı tahminler isteniyorsa
 	\end{itemize}
 	\\~\\
-	\textbf{Dezavantajları} 
+	\textbf{Dezavantajları}
 	\begin{itemize}
 		\item Ani değişimleri (örneğin kampanya kaynaklı) yavaş öğrenir
-		\item Her kombinasyon için ayrı model eğitmek gerekebilir (bu projede tek modelde çözüldü)
+		\item Her kombinasyon için ayrı model eğitmek gerekebilir (bu
+		      projede tek modelde çözüldü)
 	\end{itemize}
 \end{frame}
 
-
-\subsection{LSTM}
-\begin{frame}{LSTM}
+\begin{frame}
+	\frametitle{\insertsection: LSTM}
 	\textbf{Neden Kullanıldı} \\~\\
 	\begin{itemize}
-		\item Facebook tarafından geliştirilen, zaman serisi verilerde trend ve mevsimsellik yakalamada güçlüdür.
-		\item Kampanya etkileri gibi dışsal değişkenleri \texttt{add\_regressor} ile modele entegre edebilir.
+		\item Zaman serisi verilerde geçmiş verilerle uzun dönemli
+		      bağımlılıkları modelleyebilmesi için tercih edildi.
+		\item $sin/cos$ zaman kodlama, kampanya gibi ek girdilerle
+		      zenginleştirildi.
 	\end{itemize}
 \end{frame}
 
+\begin{frame}
+	\frametitle{\insertsection: LSTM}
+	\textbf{Avantajları}
+	\begin{itemize}
+		\item Mevsimsel yapı, trend, kampanya gibi faktörleri birlikte
+		      öğrenebilir
+		\item Farklı varyantları tek modelde işleyebilir
+		\item Zengin zaman serisi varsa (örneğin son 3–5 yılın verisi)
+		\item Karmaşık desenler ve bağımlılıklar varsa
+		\item Gecikmeli/bağımlı etkiler önemliyse
+		\item Öngörülen değişkenin geçmişe sıkı bağlı olduğu durumlar
+	\end{itemize} \\~\\
 
-\subsection{XGBoost}
-\begin{frame}{XGBoost}
+	\textbf{Dezavantajları}
+	\begin{itemize}
+		\item Daha uzun eğitim süresi
+		\item Hiperparametre ayarlamaları karmaşık
+		\item Yorumlanabilirliği düşüktür
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\insertsection: XGBoost}
 	\textbf{Neden Kullanıldı} \\~\\
 	\begin{itemize}
-		\item Facebook tarafından geliştirilen, zaman serisi verilerde trend ve mevsimsellik yakalamada güçlüdür.
-		\item Kampanya etkileri gibi dışsal değişkenleri \texttt{add\_regressor} ile modele entegre edebilir.
+		\item Facebook tarafından geliştirilen, zaman serisi verilerde
+		      trend ve mevsimsellik yakalamada güçlüdür.
+		\item Kampanya etkileri gibi dışsal değişkenleri
+		      \texttt{add\_regressor} ile modele entegre edebilir.
 	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\insertsection: XGBoost}
+	\textbf{Avantajları}
+	\begin{itemize}
+		\item Yüksek doğruluk
+		\item Hızlı eğitim ve tahmin
+		\item Öznitelik mühendisliğiyle esnek yapı
+		\item Özellik mühendisliği yapılmışsa (kanal, kampanya, tarih
+		      gibi)
+		\item Tahmin doğruluğu ön plandaysa
+		\item Daha hızlı ve agresif tahmin isteniyorsa
+		\item Heterojen veri (çok değişkenli) varsa
+	\end{itemize} \\~\\
+
+	\textbf{Dezavantajları}
+	\begin{itemize}
+		\item Zaman bileşenleri doğrudan öğrenilmez, $sin/cos$ dönüşüm
+		      gerekebilir
+		\item Doğrusal olmayan yapıdan dolayı yorumlaması zordur
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\insertsection: Model Özelliklerinin Karşılaştırması}
+	\begin{table}[h!]
+		\centering
+
+		\renewcommand{\arraystretch}{1.3}
+		% Satırlar arası boşluğu artırır
+		\resizebox{0.95\textwidth}{!}{
+			\begin{tabular}{l l l l}
+				\toprule
+				\textbf{Özellik}                        & \textbf{Prophet}        &
+				\textbf{XGBoost}                        & \textbf{LSTM}                                                     \\
+				\midrule
+				Zaman Serisi Yapısı                     & Trend + mevsimsellik
+				modeller                                & Zaman bağımlılığı zayıf & Güçlü zaman bağımlılığı modeli          \\
+				Açıklanabilirlik                        & Çok yüksek              & Orta                           & Düşük  \\
+				Veri Miktarı İhtiyacı                   & Az                      & Orta                           & Yüksek \\
+				Kampanya / dışsal etkiler               &
+				\texttt{add\_regressor} ile desteklenir & Özellik olarak eklenir  & Doğrudan
+				öğrenebilir                                                                                                 \\
+				Eğitim Süresi                           & Çok kısa                & Kısa                           & Uzun   \\
+				Genel Güvenilirlik                      & Yüksek (düşük varyans)  &
+				Yüksek doğruluk                         & Karmaşık ama güçlü                                                \\
+				Uç Değerlere Tepki                      & Yavaş                   & Agresif                        & Veri
+				miktarına bağlı                                                                                             \\
+				\bottomrule
+			\end{tabular}
+		}
+		\caption{\small Zaman serisi modelleme yaklaşımlarının temel
+			özelliklere göre karşılaştırılması}
+	\end{table}
 \end{frame}
 
 \section{Train / Test Veri Seti Hazırlanması}
-\begin{frame}{Train / Test Veri Seti Hazırlanması}
+\begin{frame}
+	\frametitle{Train / Test Veri Seti Hazırlanması}
 	content...
 \end{frame}
 
-\section{Model Eğtim Parametreleri ve Test Sonuçları}
-\begin{frame}{Model Eğtim Parametreleri ve Test Sonuçları}
+\section{Model Eğtim ve Test Sonuçları}
+\begin{frame}
+	\frametitle{\insertsection: Model Eğtim Parametreleri}
 	content...
 \end{frame}
 
-\subsection{Test Sonuçları}
-\begin{frame}{Test Sonuçları}
+\begin{frame}
+	\frametitle{\insertsection: Test Sonuçları}
 	content...
 \end{frame}
 
 \section{Başarım Metrikleri}
-\begin{frame}{Başarım Metrikleri}
+\begin{frame}
+	\frametitle{\insertsection:  MAE –Mean Absolute Error (Ortalama Mutlak
+		Hata)}
 	\begin{itemize}
-		\item MAE
-		\item RMSE
+		\item MAE, tahmin edilen değerler ile gerçek değerler
+		      arasındaki farkların mutlak değerlerinin ortalamasıdır.
+		\item Hataların büyüklüğünü doğrudan ölçer.
+	\end{itemize}
+	\vspace{0.5cm}
+	\textbf{Formül:}
+	\[
+		\text{MAE} = \frac{1}{n} \sum_{i=1}^{n} \left| y_i - \hat{y}_i \right|
+	\]
+	\vspace{0.3cm}
+	\textbf{Not:} Aykırı değerlere karşı daha az hassastır.
+\end{frame}
+
+\begin{frame}
+	\frametitle{\insertsection: RMSE – Root Mean Squared Error (Karekök
+		Ortalama Kare Hata)}
+	\begin{itemize}
+		\item RMSE, tahmin hatalarının karelerinin ortalamasının
+		      kareköküdür.
+		\item Büyük hataları daha fazla cezalandırır.
+	\end{itemize}
+	\vspace{0.5cm}
+	\textbf{Formül:}
+	\[
+		\text{RMSE} = \sqrt{ \frac{1}{n} \sum_{i=1}^{n} \left( y_i - \hat{y}_i
+			\right)^2 }
+	\]
+	\vspace{0.3cm}
+	\textbf{Not:} Aykırı değerlere karşı daha duyarlıdır.
+\end{frame}
+
+\begin{frame}
+	\frametitle{\insertsection: MAE ve RMSE Karşılaştırması}
+	\begin{table}
+		\centering
+		\small
+		\begin{tabular}{l c c}
+			\toprule
+			\textbf{Özellik}            & \textbf{MAE}   & \textbf{RMSE} \\
+			\midrule
+			Hata Türü                   & Mutlak Hata    & Kare
+			Hata                                                         \\
+			Aykırı Değerlere Duyarlılık & Az             & Yüksek
+			\\
+			Yorumu                      & Daha sezgisel  & Daha
+			teknik                                                       \\
+			Birim                       & Orijinal birim &
+			Orijinal birim                                               \\
+			\bottomrule
+		\end{tabular}
+		\caption{\small MAE ve RMSE metriklerinin temel farklarının
+			karşılaştırılması}
+	\end{table}
+\end{frame}
+
+%----------------------------------------------------
+
+\section{İşletme Parametreleri Kullanılarak Yapılan Hesaplamalar}
+% EOQ
+\begin{frame}
+	\frametitle{Ekonomik Sipariş Miktarı (EOQ)}
+	\begin{equation}
+		EOQ = \sqrt{\frac{2DS}{H}}
+	\end{equation}
+	\begin{itemize}
+		\item $D$: Yıllık talep miktarı (adet)
+		\item $S$: Sipariş başına sabit maliyet
+		\item $H$: Birim başına yıllık stok tutma maliyeti
+	\end{itemize}
+
+	\begin{tcolorbox}
+		EOQ, toplam sipariş ve stok tutma maliyetlerini minimize edecek
+		optimal sipariş miktarını belirler.
+	\end{tcolorbox}
+
+	\begin{tcolorbox}
+		Stok yönetiminde maliyet etkinliğini artırır; aşırı veya
+		yetersiz sipariş kaynaklı kayıpların önüne geçilmesini sağlar.
+	\end{tcolorbox}
+\end{frame}
+
+% ROP
+\begin{frame}
+	\frametitle{Yeniden Sipariş Noktası (ROP)}
+	\begin{equation}
+		ROP = d \cdot L + SS
+	\end{equation}
+	\begin{itemize}
+		\item $d$: Ortalama günlük talep
+		\item $L$: Tedarik süresi (gün)
+		\item $SS$: Güvenlik stoğu
+	\end{itemize}
+
+	\begin{tcolorbox}
+		ROP, stok seviyesinin bu değere ulaşması durumunda yeni sipariş
+		verilmesi gerektiğini gösterir.
+	\end{tcolorbox}
+
+	\begin{tcolorbox}
+		Tedarik süresi boyunca stok tükenmesini önleyerek süreçlerin
+		kesintisiz devam etmesini sağlar.
+	\end{tcolorbox}
+\end{frame}
+
+% SS
+\begin{frame}
+	\frametitle{Güvenlik Stoğu (Safety Stock)}
+	\begin{equation}
+		SS = Z \cdot \sigma_L
+	\end{equation}
+	\begin{itemize}
+		\item $Z$: Servis seviyesi katsayısı (örneğin \%95 için $Z
+			      \approx 1.65$)
+		\item $\sigma_L$: Tedarik süresindeki talep sapmasının standart
+		      sapması
+	\end{itemize}
+
+	\begin{tcolorbox}
+		Güvenlik stoğu, talepteki belirsizlikler veya tedarik
+		gecikmeleri karşısında oluşabilecek stok yetersizliğine karşı ek stok
+		miktarıdır.
+	\end{tcolorbox}
+
+	\begin{tcolorbox}
+		Müşteri hizmet seviyesini artırır, stok outs (stok tükenmesi)
+		riskini azaltır ve operasyonel sürekliliği destekler.
+	\end{tcolorbox}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Toplam Maliyet Bileşenleri}
+	\begin{align}
+		\text{Toplam Maliyet} & = \text{Sipariş Maliyeti} \nonumber              \\
+		                      & + \text{Stok Tutma Maliyeti} \nonumber           \\
+		                      & + \text{Eksik Maliyet} \label{eq:toplam_maliyet}
+	\end{align}
+
+	\begin{tcolorbox}
+		Toplam maliyet, stok yönetiminde dikkate alınan üç temel
+		kalemden oluşur. Her bir bileşen farklı operasyonel riski temsil eder.
+	\end{tcolorbox}
+\end{frame}
+
+\begin{frame}
+	\frametitle{Model Bazlı Maliyet Hesaplama Formülleri}
+
+	\begin{equation}
+		\text{Sipariş Maliyeti} = \frac{D}{EOQ} \cdot S
+	\end{equation}
+	\begin{equation}
+		\text{Stok Tutma Maliyeti} = \frac{EOQ}{2} \cdot H
+	\end{equation}
+	\begin{equation}
+		\text{Eksik Maliyet} = \frac{D}{EOQ} \cdot (ROP - EOQ) \cdot C
+	\end{equation}
+
+	\begin{tcolorbox}
+		Eksik maliyet, talep karşılanamadığında oluşan fırsat
+		maliyetini temsil eder. $C$: birim başına eksiklik maliyetidir.
+	\end{tcolorbox}
+\end{frame}
+
+%--------------------------------------------
+
+\section{Tahmin ve Optimizasyon}
+
+\begin{frame}
+	\frametitle{\insertsection: Prompt Parametreleri}
+	\textbf{Prompt Parametreleri}
+	\begin{itemize}
+		\item product\_id: 7
+		\item mevcut\_stok: 22
+		\item teslim\_suresi: 7
+		\item siparis\_maliyeti: 50
+		\item stok\_tutma\_maliyeti: 5
+		\item servis\_seviyesi: 0.95
+		\item stockout\_cost: 20
+		\item start\_date: 2025-05-01
+		\item end\_date: 2025-05-07
 	\end{itemize}
 \end{frame}
 
-\section{Talep Tahmini}
-\begin{frame}{Talep Tahmini}
-	content...
+\begin{frame}[fragile]
+	\frametitle{\insertsection: Prompt}
+	\scriptsize
+	\begin{verbatim}
+		Ürün ID: {parameters["product_id"]}
+		Tahmin edilen tarih aralığı: {parameters["start_date"]} - {parameters["end_date"]}
+		İşletme Parametreleri:
+		- Mevcut stok: {parameters["mevcut_stok"]}
+		- Teslim süresi: {parameters["teslim_suresi"]} gün
+		- Servis seviyesi: %{parameters["servis_seviyesi"] * 100}
+		- Sipariş maliyeti: {parameters["siparis_maliyeti"]} TL
+		- Stok tutma maliyeti: {parameters["stok_tutma_maliyeti"]} TL
+		- Stoksuz kalma maliyeti (stockout cost): {parameters["stockout_cost"]} TL
+		
+		Prophet modeli çıktısı:
+		Model Tahminleri: {df_prophet_forecast_dict}
+		Stok Hesaplamaları: {stock_calculation_prophet}
+		Varyant Risk Skorları: {variant_risk_prophet_df.to_dict(orient='records')}
+		Toplam Maliyet Analizi: {costs_prophet}
+		
+		XGBoost modeli çıktısı:
+		Model Tahminleri: {df_xgboost_forecast_dict}
+		Stok Hesaplamaları: {stock_calculation_xgboost}
+		Varyant Risk Skorları: {variant_risk_xgb_df.to_dict(orient='records')}
+		Toplam Maliyet Analizi: {costs_xgboost}
+	\end{verbatim}
 \end{frame}
 
-
-\section{Stok Optimizasyonu ve Karar Ajanı}
-\begin{frame}{Stok Optimizasyonu ve Karar Ajanı}
-	content...
+\begin{frame}[fragile]
+	\frametitle{\insertsection: Prompt}
+	\scriptsize
+	\begin{verbatim}		
+		Lütfen aşağıdaki konuları analiz et:
+		
+		1. Prophet ve XGBoost modellerinin genel tahmin ortalaması ve varyansı nedir?
+		Hangi model daha istikrarlı ve güvenilir?
+		2. Her modelin EOQ, ROP ve SS değerlerini karşılaştır. 
+		Hangisi daha uygun sipariş stratejisi sunuyor?
+		3. Toplam maliyet analizine göre hangi model işletmeye daha az maliyet çıkarıyor? 
+		(Stok tutma, sipariş ve stoksuz kalma maliyetleri dahil)
+		4. Varyant bazlı risk skorlarını incele. 
+		Yüksek riskli varyantlar hangileri ve nasıl önceliklendirilmelidir?
+		5. Sipariş önerisi:
+		- Toplam kaç adet sipariş verilmelidir?
+		- Hangi varyantlara öncelik verilmeli? (Risk skorlarına göre grupla)
+		6. Tüm analizleri göz önünde bulundurarak nihai model seçimini yap.
+		7. Kararını açık ve gerekçeli şekilde sun:
+		- Servis seviyesi, stok-out riski, maliyetler, 
+		varyant dengesi ve operasyonel uygulanabilirlik açısından değerlendir.
+		- Nihai sipariş miktarını belirt ve işletmeye önerini ilet.
+	\end{verbatim}
 \end{frame}
 
-\section{Model Sonuçları}
 \begin{frame}
-  \frametitle{Model Ortalamaları ve Varyansları}
-  \begin{tabular}{c|c|c}
-    \textbf{Model} & \textbf{Ortalama Tahmin} & \textbf{Varyans} \\ \hline
-    Prophet        & 9.59                     & 1.56 \\
-    XGBoost        & 11.65                    & 2.63 \\
-  \end{tabular}
-\end{frame}
-
-\begin{frame}
-  \frametitle{EOQ, ROP, SS Karşılaştırması}
-  \begin{tabular}{c|c|c|c}
-    \textbf{Model} & EOQ & ROP & SS \\ \hline
-    Prophet        & 380.75 & 73.90 & 6.78 \\
-    XGBoost        & 419.76 & 93.01 & 11.44 \\
-  \end{tabular}
+	\frametitle{\insertsection: Model Bazlı Tahmin Sonuçları}
+	\begin{table}
+		\centering
+		\small
+		\begin{tabular}{l c c}
+			\toprule
+			\textbf{Model} & \textbf{Ortalama Tahmin} &
+			\textbf{Varyans}                                 \\
+			\midrule
+			Prophet        & 9.59                     & 1.56 \\
+			XGBoost        & 11.65                    & 2.63 \\
+			\bottomrule
+		\end{tabular}
+		\caption{\small Prophet ve XGBoost modellerinin 7 günlük tahmin
+			ortalaması ve varyans değerleri}
+	\end{table}
 \end{frame}
 
 % ---------------------
-\section{Formüller}
+
+\section{Agent Analizleri}
 \begin{frame}
-  \frametitle{Temel Formüller}
-  \begin{equation}
-    EOQ = \sqrt{\frac{2DS}{H}}
-  \end{equation}
-  \begin{equation}
-    ROP = d \cdot L + SS
-  \end{equation}
-  \begin{equation}
-    SS = Z \cdot \sigma_L
-  \end{equation}
+	\frametitle{\insertsection: EOQ / ROP / SS Karşılaştırması}
+	\begin{table}
+		\centering
+		\renewcommand{\arraystretch}{1.2}
+		% Satır aralığı biraz artsın
+		\begin{tabular}{l|c|c|c}
+			\hline \hline
+			\textbf{Model} & \textbf{EOQ} & \textbf{ROP} &
+			\textbf{SS}                                          \\
+			\hline
+			Prophet        & 380.75       & 73.90        & 6.78  \\ \hline
+			XGBoost        & 419.76       & 93.01        & 11.44 \\
+			\hline
+		\end{tabular}
+		\vspace{0.3em}
+		\caption{\small EOQ, ROP ve SS değerlerinin Prophet ve XGBoost
+			modellerine göre karşılaştırılması}
+	\end{table}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Toplam Maliyet Formülü}
-  \begin{equation}
-    \text{Toplam Maliyet} = \text{Sipariş Maliyeti} + \text{Stok Tutma Maliyeti} + \text{Eksik Maliyet}
-  \end{equation}
+	\frametitle{\insertsection: Sipariş Stratejisi Analizi}
+	\begin{itemize}
+		\item XGBoost modeli daha yüksek EOQ, ROP ve SS değerlerine
+		      sahiptir.
+		\item  Bu, XGBoost'un daha büyük sipariş miktarları ve daha
+		      yüksek güvenlik stokları önerdiği anlamına gelir.
+		\item Ancak, bu durum daha fazla maliyet anlamına gelebilir.
+		\item Prophet modeli daha düşük değerler sunarak daha az riskli
+		      bir sipariş stratejisi sunmaktadır.
+	\end{itemize}
 \end{frame}
 
 \begin{frame}
-  \frametitle{Model Bazlı Maliyet Formülleri}
-  \begin{equation}
-    \text{Sipariş Maliyeti} = \frac{D}{EOQ} \cdot S
-  \end{equation}
-  \begin{equation}
-    \text{Stok Tutma Maliyeti} = \frac{EOQ}{2} \cdot H
-  \end{equation}
-  \begin{equation}
-    \text{Eksik Maliyet} = \frac{D}{EOQ} \cdot (ROP - EOQ) \cdot C
-  \end{equation}
-\end{frame}
+	\frametitle{\insertsection: Toplam Maliyet Karşılaştırması}
+	\begin{table}
+		\centering
+		\small % tabloyu biraz küçültüp hizalı yapar
+		\begin{tabular}{l c}
+			\toprule
+			\textbf{Model} & \textbf{Toplam Maliyet (TL)} \\
+			\midrule
+			Prophet        & 2\,039.87                    \\
+			XGBoost        & 2\,519.71                    \\
+			\bottomrule
+		\end{tabular}
+		\caption{\small Prophet ve XGBoost modellerine göre toplam stok
+			maliyeti değerleri}
+	\end{table}
 
-% ---------------------
-\section{Toplam Maliyetler}
-\begin{frame}
-  \frametitle{Toplam Maliyetler Tablosu}
-  \begin{tabular}{c|c}
-    \textbf{Model} & \textbf{Toplam Maliyet (TL)} \\ \hline
-    Prophet        & 2039.87 \\
-    XGBoost        & 2519.71 \\
-  \end{tabular}
+	\textbf{Analiz: } Prophet modeli, toplam maliyet açısından daha avantajlıdır.
+	Daha düşük maliyetler, işletmenin karlılığını artırır.
 \end{frame}
 
 \begin{frame}
-  \frametitle{Sonuçlar}
-  \begin{itemize}
-    \item Prophet modeli daha düşük toplam maliyet sunmuştur.
-    \item İşletme açısından daha karlı ve risksiz görünmektedir.
-  \end{itemize}
+	\frametitle{\insertsection: Varyant Bazlı Risk Skorları}
+	\textbf{Yüksek Riskli Varyantlar:}
+
+	Tüm varyantlar (Kırmızı, Mavi, Siyah) için risk skorları 0.855 ile
+	0.884 arasında değişmektedir. Bu, tüm varyantların yüksek risk taşıdığını
+	göstermektedir.
+	\\~\\
+	\textbf{Önceliklendirme:}
+	Tüm varyantlar yüksek risk taşıdığı için, sipariş önceliği verilmesi
+	gereken varyantlar arasında ayrım yapmak zordur. Ancak, XGBoost modelinin
+	tahminleri daha yüksek olduğu için, bu modelin tahminlerine göre sipariş
+	verilmesi önerilebilir.
 \end{frame}
 
-% ---------------------
-\section{Risk Skorları}
 \begin{frame}
-  \frametitle{Varyant Bazlı Risk Analizi}
-  \begin{itemize}
-    \item Kırmızı, Mavi, Siyah varyantları için risk skorları: 0.855–0.884
-    \item Tüm varyantlar yüksek risklidir.
-    \item XGBoost daha yüksek tahmin verdiği için öncelikli tercih olabilir.
-  \end{itemize}
+	\frametitle{\insertsection:Toplam Sipariş Miktarı ve Varyant Dağılımı}
+
+	\begin{itemize}
+		\item \textbf{Toplam Sipariş Miktarı:}
+		      \begin{itemize}
+			      \item Prophet: 51.90 adet
+			      \item XGBoost: 71.01 adet
+		      \end{itemize}
+
+		\item \textbf{Varyantlara Öncelik:}
+		      \begin{itemize}
+			      \item Tüm varyantlar yüksek risk taşımaktadır.
+			      \item Sipariş miktarları eşit dağıtılabilir.
+			      \item XGBoost modelinin öngördüğü talep artışı dikkate
+			            alınarak, varyant başına sipariş miktarı artırılabilir.
+		      \end{itemize}
+	\end{itemize}
+
 \end{frame}
 
-% END
 \begin{frame}
-  \centering
-  \Huge Teşekkürler!
+	\frametitle{\insertsection: Nihai Model Seçimi}
+
+	\textbf{Seçilen Model:} \textcolor{blue!80!black}{\textbf{Prophet}}
+
+	\vspace{0.4cm}
+	Prophet modeli aşağıdaki nedenlerle tercih edilmiştir:
+
+	\begin{itemize}
+		\item Daha düşük toplam maliyetler sunar.
+		\item Tahmin varyansı daha düşüktür (daha istikrarlı).
+		\item Daha düşük EOQ ve ROP değerleriyle \textbf{daha az
+			      sermaye bağlar}.
+		\item Risk yönetimi açısından daha temkinli ve kontrollüdür.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\insertsection: Nihai Karar ve İşletmeye Öneri}
+
+	\textbf{Servis Seviyesi:} \%95 – yüksek müşteri memnuniyeti sağlar. \\
+	\textbf{Stok-out Riski:} Prophet modeli ile minimize edilmiştir. \\
+	\textbf{Toplam Maliyet:} Prophet modelinde daha düşüktür. \\
+	\textbf{Varyant Dengesi:} Hepsi yüksek riskli, eşit dağıtım
+	mantıklıdır. \\
+	\textbf{Operasyonel Uygulanabilirlik:} Prophet daha basit ve
+	uygulanabilir bir çözüm sunmaktadır.
+
+	\vspace{0.5cm}
+	\textbf{Nihai Sipariş Miktarı:} \textcolor{teal}{\textbf{51 adet}}
+	(Her varyanta eşit dağıtım önerilir.)
+
+	\vspace{0.4cm}
+	\begin{tcolorbox}
+		Prophet modeline dayanarak, toplam 51 adet sipariş verilmesi ve
+		bu miktarın tüm varyantlar arasında eşit şekilde dağıtılması önerilmektedir. Bu
+		yaklaşım, maliyetleri minimize ederken müşteri memnuniyetini de artıracaktır.
+	\end{tcolorbox}
+\end{frame}
+
+\begin{frame}
+	\frametitle{\insertsection: Nihai Karar ve İşletmeye Öneri}
+	\textbf{Nihai Sipariş Miktarı:} \textcolor{teal}{\textbf{51 adet}}
+	(Her varyanta eşit dağıtım önerilir.)
+
+	\vspace{0.4cm}
+	\begin{tcolorbox}
+		Prophet modeline dayanarak, toplam 51 adet sipariş verilmesi ve
+		bu miktarın tüm varyantlar arasında eşit şekilde dağıtılması önerilmektedir.
+		\\~\\
+		Bu yaklaşım, maliyetleri minimize ederken müşteri memnuniyetini
+		de artıracaktır.
+		\\~\\
+		İşletme açısından daha karlı ve risksiz görünmektedir.
+	\end{tcolorbox}
+
+\end{frame}
+
+\begin{frame}
+	\centering
+	\Huge Teşekkürler!
 \end{frame}
 
 \end{document}
