@@ -4,3 +4,36 @@ __pycache__/
 *.pyc
 *.pyo
 *.pyd
+.idea
+*.iml
+.vscode
+.DS_Store
+*.egg-info/
+*.egg
+*.log
+*.sqlite3
+*.db
+
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+# Pytest cache
+__pycache__/
+
+
+# Latex Log files
+*.log
+*.fdb_latexmk
+*.fls
+*.synctex.gz
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.idx
+*.ilg
+*.ind
+*.synctex
+*.nav
+*.snm

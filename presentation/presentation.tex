@@ -1,0 +1,259 @@
+% !TeX encoding = UTF-8
+% !TeX spellcheck = tr_TR-Turkish
+\documentclass[12pt]{beamer}
+\usetheme{Madrid} % Tema tercihini değiştirebilirsin
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[turkish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{multirow}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{color}
+
+\renewcommand*\contentsname{İçindekiler}
+\renewcommand{\figurename}{Şekil}
+\renewcommand{\tablename}{Tablo}
+
+\title{Talep Tahmini ve Stok Optimizasyonu ile \\ Fazla Stok \\ ve \\ Stoksuz Kalma Problemlerini Çözme}
+\author{Nuh HATİPOĞLU}
+\date{11 Nisan 2025}
+
+\graphicspath{{/home/nuh/Desktop/StockAgentExample/results/}}
+
+\begin{document}
+
+% Title Slide
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Table of contents
+\begin{frame}
+  \frametitle{İçindekiler}
+  \tableofcontents
+\end{frame}
+
+% ---------------------
+\section{Giriş}
+\begin{frame}
+  \frametitle{Giriş}
+  \begin{itemize}
+    \item Hızlı moda sektöründe talep tahmini ve stok optimizasyonu önemlidir.
+    \item Veri bilimi ve yapay zeka kullanarak karar destek sistemleri geliştirilmiştir.
+    \item Proje, geçmiş satış verileri, ürün varyantları, kampanyalar ve kanal bilgilerini kullanmaktadır.  
+    \item Amaç, talep tahminleri ve stok optimizasyon kararları vermektir.
+    \item Proje üç temel fazdan oluşmaktadır:
+      \begin{itemize}
+        \item Sentetik veri üretimi
+        \item Çoklu makine öğrenimi modeliyle talep tahmini
+        \item Stok kararlarını veren bir akıllı ajan sistemi
+      \end{itemize}
+    \end{itemize} % Ensure \end{itemize} is properly closed
+\end{frame}
+
+\section{Sentetik Veri Üretimi ve Yapısı}
+\begin{frame}
+  \frametitle{Sentetik Veri Üretimi}
+  \begin{itemize}
+  	\item Gerçek verilere oldukça yakın şekilde 2019–2025 yılları arasını kapsayan sentetik veriler oluşturulmuştur. Bu veri seti aşağıdaki alt kümeleri içerir:
+  	\begin{itemize}
+  		\item products.csv: Ürün, kategori, beden ve renk varyant bilgileri
+  		\item sales\_data.csv: Günlük satış adetleri (ürün, varyant, mağaza, kanal bazlı)
+  		\item campaigns.csv: Kampanya tarihleri ve açıklamaları
+  	\end{itemize}  
+
+  \end{itemize}  
+\end{frame}
+
+\begin{frame}
+	\frametitle{Sentetik Veri Üretimi}
+	\begin{itemize}
+		\item Tüm varyant kombinasyonları (örneğin Ürün A - Renk Mavi - Beden L) günlük olarak satış verisine sahiptir.
+		\item Fiziksel ve Online olmak üzere iki ana kanal, 50 mağaza üzerinden modellenmiştir.
+	\end{itemize}  
+\end{frame}
+
+\section{Tahmin (Forecasting) Modelleri}
+\begin{frame}{Tahmin (Forecasting) Modelleri}
+	Ürünlerin varyant bazlı talep tahminleri için üç farklı model kullanılmıştır: 
+	\vspace{0.5cm}
+	\begin{itemize}
+		\item Prophet
+		\item LSTM 
+		\item XGBoost
+	\end{itemize}
+	\vspace{0.5cm}
+	Her model farklı avantajlara sahiptir ve farklı veri yapılarıyla en uygun sonucu verecek şekilde tasarlanmıştır.
+\end{frame}
+
+\subsection{Prophet}
+\begin{frame}{Prophet Modeli}
+	\textbf{Neden Kullanıldı} \\~\\
+	\begin{itemize}
+		\item Facebook tarafından geliştirilen, zaman serisi verilerde trend ve mevsimsellik yakalamada güçlüdür.
+		\item Kampanya etkileri gibi dışsal değişkenleri \texttt{add\_regressor} ile modele entegre edebilir.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Prophet Modeli}
+	\textbf{Avantajları} 
+	\begin{itemize}
+		\item Model açıklanabilirliği yüksek
+		\item Mevsimsel dalgalanmaları başarılı şekilde yakalar
+		\item Az veriyle de çalışabilir
+	\end{itemize}
+	\\~\\
+	\textbf{Dezavantajları} 
+	\begin{itemize}
+		\item Ani değişimleri (örneğin kampanya kaynaklı) yavaş öğrenir
+		\item Her kombinasyon için ayrı model eğitmek gerekebilir (bu projede tek modelde çözüldü)
+	\end{itemize}
+\end{frame}
+
+
+\subsection{LSTM}
+\begin{frame}{LSTM}
+	\textbf{Neden Kullanıldı} \\~\\
+	\begin{itemize}
+		\item Facebook tarafından geliştirilen, zaman serisi verilerde trend ve mevsimsellik yakalamada güçlüdür.
+		\item Kampanya etkileri gibi dışsal değişkenleri \texttt{add\_regressor} ile modele entegre edebilir.
+	\end{itemize}
+\end{frame}
+
+
+\subsection{XGBoost}
+\begin{frame}{XGBoost}
+	\textbf{Neden Kullanıldı} \\~\\
+	\begin{itemize}
+		\item Facebook tarafından geliştirilen, zaman serisi verilerde trend ve mevsimsellik yakalamada güçlüdür.
+		\item Kampanya etkileri gibi dışsal değişkenleri \texttt{add\_regressor} ile modele entegre edebilir.
+	\end{itemize}
+\end{frame}
+
+\section{Train / Test Veri Seti Hazırlanması}
+\begin{frame}{Train / Test Veri Seti Hazırlanması}
+	content...
+\end{frame}
+
+\section{Model Eğtim Parametreleri ve Test Sonuçları}
+\begin{frame}{Model Eğtim Parametreleri ve Test Sonuçları}
+	content...
+\end{frame}
+
+\subsection{Test Sonuçları}
+\begin{frame}{Test Sonuçları}
+	content...
+\end{frame}
+
+\section{Başarım Metrikleri}
+\begin{frame}{Başarım Metrikleri}
+	\begin{itemize}
+		\item MAE
+		\item RMSE
+	\end{itemize}
+\end{frame}
+
+\section{Talep Tahmini}
+\begin{frame}{Talep Tahmini}
+	content...
+\end{frame}
+
+
+\section{Stok Optimizasyonu ve Karar Ajanı}
+\begin{frame}{Stok Optimizasyonu ve Karar Ajanı}
+	content...
+\end{frame}
+
+\section{Model Sonuçları}
+\begin{frame}
+  \frametitle{Model Ortalamaları ve Varyansları}
+  \begin{tabular}{c|c|c}
+    \textbf{Model} & \textbf{Ortalama Tahmin} & \textbf{Varyans} \\ \hline
+    Prophet        & 9.59                     & 1.56 \\
+    XGBoost        & 11.65                    & 2.63 \\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}
+  \frametitle{EOQ, ROP, SS Karşılaştırması}
+  \begin{tabular}{c|c|c|c}
+    \textbf{Model} & EOQ & ROP & SS \\ \hline
+    Prophet        & 380.75 & 73.90 & 6.78 \\
+    XGBoost        & 419.76 & 93.01 & 11.44 \\
+  \end{tabular}
+\end{frame}
+
+% ---------------------
+\section{Formüller}
+\begin{frame}
+  \frametitle{Temel Formüller}
+  \begin{equation}
+    EOQ = \sqrt{\frac{2DS}{H}}
+  \end{equation}
+  \begin{equation}
+    ROP = d \cdot L + SS
+  \end{equation}
+  \begin{equation}
+    SS = Z \cdot \sigma_L
+  \end{equation}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Toplam Maliyet Formülü}
+  \begin{equation}
+    \text{Toplam Maliyet} = \text{Sipariş Maliyeti} + \text{Stok Tutma Maliyeti} + \text{Eksik Maliyet}
+  \end{equation}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Model Bazlı Maliyet Formülleri}
+  \begin{equation}
+    \text{Sipariş Maliyeti} = \frac{D}{EOQ} \cdot S
+  \end{equation}
+  \begin{equation}
+    \text{Stok Tutma Maliyeti} = \frac{EOQ}{2} \cdot H
+  \end{equation}
+  \begin{equation}
+    \text{Eksik Maliyet} = \frac{D}{EOQ} \cdot (ROP - EOQ) \cdot C
+  \end{equation}
+\end{frame}
+
+% ---------------------
+\section{Toplam Maliyetler}
+\begin{frame}
+  \frametitle{Toplam Maliyetler Tablosu}
+  \begin{tabular}{c|c}
+    \textbf{Model} & \textbf{Toplam Maliyet (TL)} \\ \hline
+    Prophet        & 2039.87 \\
+    XGBoost        & 2519.71 \\
+  \end{tabular}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Sonuçlar}
+  \begin{itemize}
+    \item Prophet modeli daha düşük toplam maliyet sunmuştur.
+    \item İşletme açısından daha karlı ve risksiz görünmektedir.
+  \end{itemize}
+\end{frame}
+
+% ---------------------
+\section{Risk Skorları}
+\begin{frame}
+  \frametitle{Varyant Bazlı Risk Analizi}
+  \begin{itemize}
+    \item Kırmızı, Mavi, Siyah varyantları için risk skorları: 0.855–0.884
+    \item Tüm varyantlar yüksek risklidir.
+    \item XGBoost daha yüksek tahmin verdiği için öncelikli tercih olabilir.
+  \end{itemize}
+\end{frame}
+
+% END
+\begin{frame}
+  \centering
+  \Huge Teşekkürler!
+\end{frame}
+
+\end{document}
